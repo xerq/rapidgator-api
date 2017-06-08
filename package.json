@@ -1,6 +1,6 @@
 {
   "name": "rapidgator",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Rapidgator API",
   "main": "dist/lib/index.js",
   "scripts": {
@@ -27,9 +27,7 @@
     "babel-register": "^6.24.1",
     "chai": "^4.0.2",
     "eslint": "^3.19.0",
-    "install": "^0.10.1",
     "mocha": "^3.4.2",
-    "npm": "^5.0.3",
     "random-buffer": "^0.1.0"
   },
   "dependencies": {
