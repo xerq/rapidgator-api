@@ -1,5 +1,7 @@
 import got from "got";
+import fs from "fs-extra";
 import md5 from "md5";
+import md5File from "md5-file/promise";
 import FormData from "form-data";
 import { URL } from "url";
 import { promisify } from "bluebird";
@@ -36,11 +38,28 @@ class Rapidgator {
         this.sid = result.response.session_id;
     }
 
-    async _prepareUpload(name, buffer, folderID) {
+    async _prepareUpload(options) {
+        const filePath = options.filePath;
+        const buffer = options.buffer;
+        const name = options.name;
+        const folderID = options.folderID;
+        
+        let hash = "";
+        let size = 0;
+
+        if(filePath) {
+            hash = await md5File(filePath);
+            size = fs.statSync(filePath).size;
+        }
+        else if(buffer) {
+            hash = md5(buffer);
+            size = buffer.byteLength;
+        }
+
         const query = {
             "sid": this.sid,
-            "hash": md5(buffer),
-            "size": buffer.byteLength,
+            "hash": hash,
+            "size": size,
             "name": name
         };
 
@@ -91,8 +110,8 @@ class Rapidgator {
             throw new Error("You did not specify name");
         }
 
-        if(!options.buffer) {
-            throw new Error("You did not specify buffer");
+        if(!options.buffer && !options.filePath) {
+            throw new Error("You did not specify buffer or filePath");
         }
 
         if(!this.sid) {
@@ -101,9 +120,9 @@ class Rapidgator {
 
         const name = options.name;
         const buffer = options.buffer;
-        const folderID = options.folderID;
+        const filePath = options.filePath;
 
-        const preparedUpload = await this._prepareUpload(name, buffer, folderID);
+        const preparedUpload = await this._prepareUpload(options);
         
         if(preparedUpload.alreadyUploaded) {
             return preparedUpload.url;
@@ -114,10 +133,18 @@ class Rapidgator {
 
         const form = new FormData();
 
-        form.append("file", buffer, {
-            filename: name,
-            knownLength: buffer.byteLength
-        });
+        if(filePath) {
+            form.append("file", fs.createReadStream(filePath), {
+                filename: name,
+                knownLength: fs.statSync(filePath).size
+            });
+        }
+        else if(buffer) {
+            form.append("file", buffer, {
+                filename: name,
+                knownLength: buffer.byteLength
+            });
+        }
 
         const formLength = await promisify(form.getLength).bind(form)();
 
