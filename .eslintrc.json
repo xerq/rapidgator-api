@@ -31,6 +31,9 @@
             "always"
         ],
         "no-console": "warn",
-        "no-var": "error"
+        "no-var": "error",
+        "space-before-blocks": "error",
+        "arrow-spacing": "error",
+        "brace-style": ["error", "stroustrup"]
     }
 }
