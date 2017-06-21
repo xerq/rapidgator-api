@@ -8,15 +8,15 @@ import { promisify } from "bluebird";
 
 class Rapidgator {
     constructor(options) {
-        if(!options) {
+        if (!options) {
             throw new Error("You did not specify options");
         }
 
-        if(!options.login) {
+        if (!options.login) {
             throw new Error("You did not specify login");
         }
 
-        if(!options.password) {
+        if (!options.password) {
             throw new Error("You did not specify password");
         }
 
@@ -47,11 +47,11 @@ class Rapidgator {
         let hash = "";
         let size = 0;
 
-        if(filePath) {
+        if (filePath) {
             hash = await md5File(filePath);
             size = fs.statSync(filePath).size;
         }
-        else if(buffer) {
+        else if (buffer) {
             hash = md5(buffer);
             size = buffer.byteLength;
         }
@@ -63,7 +63,7 @@ class Rapidgator {
             "name": name
         };
 
-        if(folderID) {
+        if (folderID) {
             query.folder_id = folderID;
         }
 
@@ -73,7 +73,7 @@ class Rapidgator {
 
         const result = JSON.parse(response.body);
 
-        if(result.response.link) {
+        if (result.response.link) {
             return {
                 alreadyUploaded: true,
                 url: unescape(result.response.link)
@@ -102,19 +102,19 @@ class Rapidgator {
     }
 
     async upload(options) {
-        if(!options) {
+        if (!options) {
             throw new Error("You did not specify options");
         }
 
-        if(!options.name) {
+        if (!options.name) {
             throw new Error("You did not specify name");
         }
 
-        if(!options.buffer && !options.filePath) {
+        if (!options.buffer && !options.filePath) {
             throw new Error("You did not specify buffer or filePath");
         }
 
-        if(!this.sid) {
+        if (!this.sid) {
             throw new Error("You are not logged in");
         }
 
@@ -124,7 +124,7 @@ class Rapidgator {
 
         const preparedUpload = await this._prepareUpload(options);
         
-        if(preparedUpload.alreadyUploaded) {
+        if (preparedUpload.alreadyUploaded) {
             return preparedUpload.url;
         }
 
@@ -133,13 +133,13 @@ class Rapidgator {
 
         const form = new FormData();
 
-        if(filePath) {
+        if (filePath) {
             form.append("file", fs.createReadStream(filePath), {
                 filename: name,
                 knownLength: fs.statSync(filePath).size
             });
         }
-        else if(buffer) {
+        else if (buffer) {
             form.append("file", buffer, {
                 filename: name,
                 knownLength: buffer.byteLength

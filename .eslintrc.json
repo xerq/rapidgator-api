@@ -34,6 +34,7 @@
         "no-var": "error",
         "space-before-blocks": "error",
         "arrow-spacing": "error",
+        "keyword-spacing": "error",
         "brace-style": ["error", "stroustrup"]
     }
 }
