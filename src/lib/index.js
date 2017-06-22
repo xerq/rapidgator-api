@@ -33,7 +33,7 @@ class Rapidgator {
         this.sid = "";
     }
 
-    async logIn() {
+    async logIn(): Promise<void> {
         const response: Response = await got("http://rapidgator.net/api/user/login", {
             query: {
                 "username": this.login,
@@ -94,7 +94,7 @@ class Rapidgator {
         };
     }
 
-    async _getUploadedFile(uploadID: string) {
+    async _getUploadedFile(uploadID: string): Promise<string> {
         const response: Response = await got("http://rapidgator.net/api/file/dupload_info", {
             query: {
                 "sid": this.sid,
@@ -109,7 +109,7 @@ class Rapidgator {
         return fileURL;
     }
 
-    async upload(options: { name: string, buffer?: Buffer, filePath?: string, folderID?: number }) {
+    async upload(options: { name: string, buffer?: Buffer, filePath?: string, folderID?: number }): Promise<string> {
         if (!options) {
             throw new Error("You did not specify options");
         }

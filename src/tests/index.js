@@ -5,9 +5,12 @@ import randomBuffer from "random-buffer";
 import fs from "fs-extra";
 import Rapidgator from "../lib/";
 
+const login: string = process.env.LOGIN || "";
+const password: string = process.env.PASSWORD || "";
+
 const rapidgator = new Rapidgator({
-    login: process.env.LOGIN,
-    password: process.env.PASSWORD
+    login: login,
+    password: password
 });
 
 describe("Rapidgator API", () => {
@@ -17,16 +20,20 @@ describe("Rapidgator API", () => {
         expect(rapidgator.sid.length).to.be.above(0);
     });
 
-    it("Should upload a file by buffer to rapidgator", async () => {
+    const shouldUploadByBuffer: Object = it("Should upload a file by buffer to rapidgator", async () => {
+        shouldUploadByBuffer.timeout(20000);
+
         const fileURL: string = await rapidgator.upload({
             name: "file.test.random",
             buffer: randomBuffer(450000)
         });
 
         expect(fileURL).to.not.be.empty;
-    }).timeout(20000);
+    });
 
-    it("Should upload a file by filePath to rapidgator", async () => {
+    const shouldUploadByFilepath: Object = it("Should upload a file by filePath to rapidgator", async () => {
+        shouldUploadByFilepath.timeout(20000);
+
         const filePath: string = "/tmp/file.test.random";
 
         await fs.writeFile(filePath, randomBuffer(450000));
@@ -37,5 +44,5 @@ describe("Rapidgator API", () => {
         });
         
         expect(fileURL).to.not.be.empty;
-    }).timeout(20000);
+    });
 });
