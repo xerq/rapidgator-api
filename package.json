@@ -9,6 +9,7 @@
     "test:build": "npm run build && mocha dist/tests/*.js",
     "eslint": "eslint . --ignore-path .gitignore",
     "flow": "flow",
+    "flow-typed": "flow-typed",
     "prepublish": "npm run build"
   },
   "keywords": [
