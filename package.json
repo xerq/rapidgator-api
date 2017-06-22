@@ -2,6 +2,10 @@
   "name": "rapidgator",
   "version": "0.1.0",
   "description": "Rapidgator API",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/xerq/rapidgator-api.git"
+  },
   "main": "dist/lib/index.js",
   "scripts": {
     "build": "rm -rf dist && babel src -d dist -s",
