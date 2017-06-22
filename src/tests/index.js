@@ -1,3 +1,5 @@
+// @flow
+
 import { expect } from "chai";
 import randomBuffer from "random-buffer";
 import fs from "fs-extra";
@@ -16,7 +18,7 @@ describe("Rapidgator API", () => {
     });
 
     it("Should upload a file by buffer to rapidgator", async () => {
-        const fileURL = await rapidgator.upload({
+        const fileURL: string = await rapidgator.upload({
             name: "file.test.random",
             buffer: randomBuffer(450000)
         });
@@ -25,11 +27,11 @@ describe("Rapidgator API", () => {
     }).timeout(20000);
 
     it("Should upload a file by filePath to rapidgator", async () => {
-        const filePath = "/tmp/file.test.random";
+        const filePath: string = "/tmp/file.test.random";
 
         await fs.writeFile(filePath, randomBuffer(450000));
 
-        const fileURL = await rapidgator.upload({
+        const fileURL: string = await rapidgator.upload({
             name: "file.test.random",
             filePath: filePath
         });
