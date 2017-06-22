@@ -1,3 +1,5 @@
+// @flow
+
 import got from "got";
 import fs from "fs-extra";
 import md5 from "md5";
@@ -5,9 +7,15 @@ import md5File from "md5-file/promise";
 import FormData from "form-data";
 import { URL } from "url";
 import { promisify } from "bluebird";
+import type { Response } from "got";
+import type { PreparedUpload } from "../types/";
 
 class Rapidgator {
-    constructor(options) {
+    sid: string;
+    login: string;
+    password: string;
+
+    constructor(options: { login: string, password: string }) {
         if (!options) {
             throw new Error("You did not specify options");
         }
@@ -26,26 +34,26 @@ class Rapidgator {
     }
 
     async logIn() {
-        const response = await got("http://rapidgator.net/api/user/login", {
+        const response: Response = await got("http://rapidgator.net/api/user/login", {
             query: {
                 "username": this.login,
                 "password": this.password
             }
         });
 
-        const result = JSON.parse(response.body);
+        const result: Object = JSON.parse(response.body);
 
         this.sid = result.response.session_id;
     }
 
-    async _prepareUpload(options) {
-        const filePath = options.filePath;
-        const buffer = options.buffer;
-        const name = options.name;
-        const folderID = options.folderID;
+    async _prepareUpload(options: { filePath?: string, buffer?: Buffer, name: string, folderID?: number }): Promise<PreparedUpload> {
+        const filePath: ?string = options.filePath;
+        const buffer: ?Buffer = options.buffer;
+        const name: string = options.name;
+        const folderID: ?number = options.folderID;
         
-        let hash = "";
-        let size = 0;
+        let hash: string = "";
+        let size: number = 0;
 
         if (filePath) {
             hash = await md5File(filePath);
@@ -56,7 +64,7 @@ class Rapidgator {
             size = buffer.byteLength;
         }
 
-        const query = {
+        const query: Object = {
             "sid": this.sid,
             "hash": hash,
             "size": size,
@@ -64,14 +72,14 @@ class Rapidgator {
         };
 
         if (folderID) {
-            query.folder_id = folderID;
+            query["folder_id"] = folderID;
         }
 
-        const response = await got("http://rapidgator.net/api/file/dupload", {
+        const response: Response = await got("http://rapidgator.net/api/file/dupload", {
             query: query
         });
 
-        const result = JSON.parse(response.body);
+        const result: Object = JSON.parse(response.body);
 
         if (result.response.link) {
             return {
@@ -81,27 +89,27 @@ class Rapidgator {
         }
 
         return {
-            alreadyExists: false,
+            alreadyUploaded: false,
             url: unescape(result.response.url)
         };
     }
 
-    async _getUploadedFile(uploadID) {
-        const response = await got("http://rapidgator.net/api/file/dupload_info", {
+    async _getUploadedFile(uploadID: string) {
+        const response: Response = await got("http://rapidgator.net/api/file/dupload_info", {
             query: {
                 "sid": this.sid,
                 "uuid": uploadID
             }
         });
 
-        const result = JSON.parse(response.body);
+        const result: Object = JSON.parse(response.body);
 
-        const fileURL = unescape(result.response.link);
+        const fileURL: string = unescape(result.response.link);
 
         return fileURL;
     }
 
-    async upload(options) {
+    async upload(options: { name: string, buffer?: Buffer, filePath?: string, folderID?: number }) {
         if (!options) {
             throw new Error("You did not specify options");
         }
@@ -118,20 +126,21 @@ class Rapidgator {
             throw new Error("You are not logged in");
         }
 
-        const name = options.name;
-        const buffer = options.buffer;
-        const filePath = options.filePath;
+        const name: string = options.name;
+        const buffer: ?Buffer = options.buffer;
+        const filePath: ?string = options.filePath;
+        options.folderID = 1;
 
-        const preparedUpload = await this._prepareUpload(options);
+        const preparedUpload: PreparedUpload = await this._prepareUpload(options);
         
         if (preparedUpload.alreadyUploaded) {
             return preparedUpload.url;
         }
 
-        const uploadURL = new URL(preparedUpload.url);
-        const uploadID = uploadURL.searchParams.get("uuid");
+        const uploadURL: URL = new URL(preparedUpload.url);
+        const uploadID: string = uploadURL.searchParams.get("uuid") || "";
 
-        const form = new FormData();
+        const form: FormData = new FormData();
 
         if (filePath) {
             form.append("file", fs.createReadStream(filePath), {
@@ -146,7 +155,7 @@ class Rapidgator {
             });
         }
 
-        const formLength = await promisify(form.getLength).bind(form)();
+        const formLength: number = await promisify(form.getLength).bind(form)();
 
         await got(uploadURL, {
             body: form,
@@ -155,7 +164,7 @@ class Rapidgator {
             }
         });
 
-        const uploadInfo = await this._getUploadedFile(uploadID);
+        const uploadInfo: string = await this._getUploadedFile(uploadID);
 
         return uploadInfo;
     }
