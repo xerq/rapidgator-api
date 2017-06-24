@@ -16,7 +16,7 @@ Javascript module for accessing the Rapidgator's API
 ## Usage
 
 ```javascript
-import Rapidgator from "../rapidgator/";
+import Rapidgator from "rapidgator";
 
 const loginOptions = {
     login: "yourlogin",
